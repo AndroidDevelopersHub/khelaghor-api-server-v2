@@ -1,0 +1,7 @@
+{
+  "secret": "adh",
+  "refreshTokenSecret": "radh",
+  "port": 3000,
+  "tokenLife": "1d",
+  "refreshTokenLife": "60d"
+}
