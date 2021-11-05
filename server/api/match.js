@@ -35,7 +35,7 @@ async function create(req,res){
     } else {
         let avatar = req.files.cover;
         await avatar.mv('./gallery/' + avatar.name);
-        req.body.cover = "http://localhost:3000/gallery/"+ avatar.name
+        req.body.cover = "https://api.android-developers-hub.xyz/gallery/"+ avatar.name
 
         console.log(req.body)
         try{
@@ -51,9 +51,15 @@ async function create(req,res){
 
 
 async function match_list(req,res){
-    if (req.user.type !== 1){
-        return _response.apiFailed(res, "Permission denied!")
+
+    if (!req.query.game_status){
+        return _response.apiFailed(res, "Please select status")
     }
+    if (!req.query.game_name){
+        return _response.apiFailed(res, "Please select game name")
+    }
+
+
     let limit = 500;
     let page = 1;
     let totalDocs = 0;
@@ -66,10 +72,15 @@ async function match_list(req,res){
     let offset = (page - 1) * limit
 
     try{
-        let count = await db.awaitQuery("SELECT COUNT(*) AS total FROM `match`");
+        let count = await db.awaitQuery("SELECT COUNT(*) AS total FROM `match` WHERE game_status = "+parseInt(req.query.game_status)+"  AND game_name = '"+req.query.game_name+"'  ");
         totalDocs = count[0].total
     }catch (e) {
         return _response.apiFailed(res, e)
+    }
+
+    let project= "*"
+    if (req.user.type === 0){
+        project = "id,title,cover,total_player,type,map,per_kill,entry_fee,game_name,game_status,createdAt,prize"
     }
 
     //Search by String
@@ -77,7 +88,7 @@ async function match_list(req,res){
 
         let a = "%"+req.query.search_string+"%"
         try{
-            let result = await db.awaitQuery("SELECT * FROM `match` WHERE CONCAT(title) LIKE '" + a + "' ORDER BY match.id DESC LIMIT " + limit + " OFFSET " + offset + " ")
+            let result = await db.awaitQuery("SELECT "+project+" FROM `match` WHERE CONCAT(title) LIKE '" + a + "' AND game_status = "+req.query.game_status+"  AND game_name = '"+req.query.game_name+"'  ORDER BY match.id DESC LIMIT " + limit + " OFFSET " + offset + " ")
             if (result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.userFound, result, {
                     page: parseInt(page),
@@ -92,7 +103,7 @@ async function match_list(req,res){
         }
     } else {
         try{
-            let result = await db.awaitQuery("SELECT * FROM `match` ORDER BY match.id DESC LIMIT " + limit + " OFFSET " + offset + "")
+            let result = await db.awaitQuery("SELECT "+project+" FROM `match` WHERE game_status = "+parseInt(req.query.game_status)+"  AND game_name = '"+req.query.game_name+"'  ORDER BY match.id DESC LIMIT " + limit + " OFFSET " + offset + "")
             if (result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.userFound, result, {
                     page: parseInt(page),
@@ -107,7 +118,6 @@ async function match_list(req,res){
         }
     }
 }
-
 
 
 
