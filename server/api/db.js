@@ -3,7 +3,7 @@ const path = require('path')
 require('dotenv').config({
     path: path.resolve(__dirname, '../../.env')
 })
-let whichServer = 23;  // 1 for Dev server 2 for Local server
+let whichServer = 1;  // 1 for Dev server 2 for Local server
 let connection = null;
 if (whichServer === 1) {
     // Dev
