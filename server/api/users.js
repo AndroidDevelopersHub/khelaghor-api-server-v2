@@ -20,7 +20,7 @@ const nodemailer = require("nodemailer");
 
 module.exports = function (router) {
     router.post('/user', create);
-    router.post('/login', login);
+    router.post('/user-login', login);
     router.get('/user',validateAuthUser, user_list);
     router.put('/user',validateAuthUser, update);
     router.post('/user-balance-update',validateAuthUser, userBalanceUpdate);
